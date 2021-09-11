@@ -21,7 +21,7 @@ def generate_base_data():
 
 def generate_good_data():
     f = open('good.txt', 'w')
-    for i in range(10):
+    for i in range(1000):
         data = generate_base_data()
         
         account_number = random.randint(0,999999)
@@ -39,11 +39,11 @@ def generate_good_data():
 
 def generate_bad_data():
     f = open('bad.txt', 'w')
-    for i in range(10):
+    for i in range(1000):
         data = generate_base_data()
         
-        account_number = random.randint(0,999999)
-        prev_meter_reading = random.randint(0,99999)
+        account_number = random.randint(100000,999999)
+        prev_meter_reading = random.randint(10000,99999)
         curr_meter_reading = random.randint(prev_meter_reading, 99999)
         
         # Corrupt the data - approximately 3% of data will have an anomaly
