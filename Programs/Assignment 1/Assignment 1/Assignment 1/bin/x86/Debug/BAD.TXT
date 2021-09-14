@@ -1,10 +1,6 @@
 ACCOUNT NUMBER       CURRENT READING      PREVIOUS READING
-
 938033               70801                2RRyT
-
 197698               E75zO                45564
-
-6934
 JCS3FL               83566                66046
 9EEL1z               78590                18942
 278520               DW9CE                73878
@@ -21,15 +17,12 @@ WAdiWv               95851                92368
 366872               37294                hWHmF
 HVlq2M               90165                24900
 lkXtKN               72929                52805
-451996                                    20
-401840                                    87
-mU6c
-
+t7yo9q               77798                68019
+572236               3mU6c                85111
 ZdpRWD               76292                41362
-
 328463               99539                hBW9n
-4050np                                    TG
-6dN995                                    73
+325570               0npTG                89405
+722743               99573                9a6dN
 A2fwC7               70699                44441
 818612               GqZ0C                26047
 oTRQHR               89241                52479
