@@ -73,7 +73,7 @@
          03 FILLER         PIC X(5)     VALUE SPACES.
          03 FILLER         PIC X(15)    VALUE 'STREET ADDRESS'.
          03 FILLER         PIC X(5)     VALUE SPACES.
-         03 FILLER         PIC X(10)     VALUE 'UNITS USED'.
+         03 FILLER         PIC X(10)    VALUE 'UNITS USED'.
 
        01 INVALID-RECORD.
          03 ACCOUNT-NUMBER PIC 9(6).
