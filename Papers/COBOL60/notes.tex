@@ -6,8 +6,11 @@
 
 \usepackage{graphicx}
 \usepackage{tabularx}
-\usepackage{multicol}
 \usepackage{enumitem}
+
+% Geometry 
+\usepackage{geometry}
+\geometry{letterpaper, left=15mm, top=20mm, right=15mm, bottom=20mm}
 
 % Fancy Header
 \usepackage{fancyhdr}
@@ -18,20 +21,11 @@
 \lfoot{CALU Fall 2021}
 \rfoot{RDK}
 
-% Geometry 
-\usepackage{geometry}
-\geometry{letterpaper, left=15mm, top=20mm, right=15mm, bottom=20mm}
-
 % Add vertical spacing to tables
 \renewcommand{\arraystretch}{2}
 
 % Macros
 \newcommand{\definition}[1]{\underline{\textbf{#1}}}
-
-\usepackage{setspace}
-\usepackage{etoolbox}
-\AtBeginEnvironment{quote}{\singlespace\vspace{-\topsep}\small}
-\AtEndEnvironment{quote}{\vspace{-\topsep}\endsinglespace}
 
 % Begin Document
 \begin{document}
@@ -46,7 +40,6 @@
     \item COBOL has remained in the top 30 of the TIOBE rankings since they began in 1989. Only C and C++ can boast the same.
     \item Estimates are \$1.7 trillion is wasted on failed projects yearly
     \item ``COBOL is 60-years young. The language that powers the mainframes that run the world is as relevant today as it was in the 1960s. With the presence of new digital pressures, the mainframe and COBOL are back at the forefront for the modern developer enabling innovation and transformation'' - Steven Dickens IBM LinuxONE
-
 
 \end{itemize}
 
@@ -87,7 +80,6 @@
         \item COBOL is designed to allow the reader to know at a glance what the code is trying to achieve
         \item Ease of entry to learning and thus jobs
     \end{itemize}
-
 
 \end{itemize}
 
