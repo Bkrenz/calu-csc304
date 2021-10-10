@@ -36,3 +36,11 @@ The complex COBOL Records that could be written:
    2. If the flag for good data is still good, then output the record to good data
 4. Close the files
 
+
+## Error Report
+
+Good data is written out same as it came in, no modifications.
+
+A layout for the error report needs to be developed, with the approrpriate accompanying information.
+A suggested reference is available in the book, on page 210 (jump to 222).
+The column formatting makes sense.
