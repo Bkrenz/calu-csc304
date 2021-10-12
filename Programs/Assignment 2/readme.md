@@ -18,7 +18,6 @@ Sale Amount         42-47               Numeric
 Commission Rate     48-50               Numeric
 Car Model           51-63               Alphanumeric
 Car Year            64-67               Numeric
-
 ```
 
 **Test Data**: See test-data.txt
