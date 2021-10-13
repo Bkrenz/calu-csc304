@@ -1,0 +1,37 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "build-assignment1",
+			"command": "cbllink",
+			"args": [
+				"-obuild\\a1",
+                "Assignment 1.cbl"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}\\Programs\\Assignment 1"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"type": "shell",
+			"label": "build-assignment2",
+			"command": "cbllink",
+			"args": [
+				"-obuild\\a2",
+                "assignment2.cbl"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}\\Programs\\Assignment 2"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	]
+}
