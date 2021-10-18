@@ -319,7 +319,7 @@
       *
       ******************************************************************
        VALIDATE-CAR-YEAR.
-           IF CAR-YEAR > 95 OR CAR-YEAR < 30 THEN
+           IF CAR-YEAR > 1995 OR CAR-YEAR < 1930 THEN
                MOVE ERR-INVALID-CAR-YEAR TO ERROR-MESSAGE
                MOVE INPUT-RECORD TO RECORD-DATA
                MOVE INVALID-RECORD TO BAD-PRINT-LINE
