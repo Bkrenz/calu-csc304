@@ -97,6 +97,10 @@
            'INCOMING RECORD MISSING DATA'.
        01 ERR-INVALID-DAY   PIC X(40) VALUE 'INVALID DAY'.
        01 ERR-INVALID-MONTH PIC X(40) VALUE 'INVALID MONTH'.
+       01 ERR-INVALID-COMMISSION   PIC X(40) VALUE
+           'INVALID COMMISSION RATE'.
+       01 ERR-INVALID-CAR-YEAR     PIC X(40) VALUE
+           'INVALID CAR YEAR'.
 
 
        PROCEDURE DIVISION.
@@ -300,7 +304,12 @@
       *
       ******************************************************************
        VALIDATE-COMMISSION-RATE.
-
+           IF COMMISSION-RATE > 100 OR COMMISSION-RATE < 0 THEN
+                MOVE ERR-INVALID-COMMISSION TO ERROR-MESSAGE
+                MOVE INPUT-RECORD TO RECORD-DATA
+                MOVE INVALID-RECORD TO BAD-PRINT-LINE
+                WRITE BAD-PRINT-LINE
+                MOVE 'F' TO VALID-RECORD-SWITCH.
 
       ******************************************************************
       *
@@ -310,7 +319,12 @@
       *
       ******************************************************************
        VALIDATE-CAR-YEAR.
-
+           IF CAR-YEAR > 95 OR CAR-YEAR < 30 THEN
+               MOVE ERR-INVALID-CAR-YEAR TO ERROR-MESSAGE
+               MOVE INPUT-RECORD TO RECORD-DATA
+               MOVE INVALID-RECORD TO BAD-PRINT-LINE
+               WRITE BAD-PRINT-LINE
+               MOVE 'F' TO VALID-RECORD-SWITCH.
 
 
       ******************************************************************
