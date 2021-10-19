@@ -92,10 +92,10 @@
       
       * PROBLEM 5
 
-      * A. YES
+      * A. NO
       * B. YES
       * C. YES
-      * D. NO
+      * D. YES
       * E. YES
       * F. NO
       * G. NO
