@@ -42,12 +42,15 @@
            05  CUSTOMER-NAME       PIC X(10). 
            05  SALE-DATE.
                06 SALE-MONTH       PIC 99.
+                   88 VALID-MONTH VALUES 1 THRU 12.
                06 SALE-DAY         PIC 99.
                06 SALE-YEAR        PIC 99.
            05  SALE-AMOUNT         PIC 9(6). 
            05  COMMISSION-RATE     PIC 9(3).
+               88 VALID-COMM-RATE VALUES 0 THRU 100.
            05  CAR-MODEL           PIC X(13).
            05  CAR-YEAR            PIC 9(4).
+               88 VALID-CAR-YEAR VALUES 1930 THRU 1995.
       
       * GOOD RECORD OUTPUT INFORMATION
        FD VALID-RECORDS-FILE
@@ -64,6 +67,12 @@
 
 
        WORKING-STORAGE SECTION.
+       
+      * INVALID DATA RECORD
+       01 INVALID-RECORD.
+           05 ERROR-MESSAGE PIC X(40) VALUE 'ERROR MESSAGE'.
+           05 FILLER        PIC X(5)  VALUE SPACES.
+           05 RECORD-DATA   PIC X(90) VALUE 'RECORD DATA'.
 
       * DATA-REMAINS-SWITCH: KEEP TRACK OF DATA LEFT IN INPUT
        01 DATA-REMAINS-SWITCH PIC X(2) VALUES SPACES.
@@ -71,14 +80,14 @@
       * VALID-RECORD-SWITCH: USED WHEN VALIDATING A RECORD
        01 VALID-RECORD-SWITCH PIC X(7) VALUE 'ERROR'.
 
-      * MISSING-DATA-SWITCH
-       01 MISSING-DATA-SWITCH PIC X VALUE 'F'.
-
-      * VALID-DATE-FLAG
-       01 VALID-DATE-FLAG PIC X VALUE 'T'.
-
-      * INVALID-DAY-SWITCH
-       01 INVALID-DAY-SWITCH  PIC X VALUE 'F'.
+      * DATA VALIDATION FLAGS
+       01 DVF-MISSING-DATA      PIC X VALUE 'F'.
+       01 DVF-NONNUMERIC-DATA   PIC X VALUE 'F'.
+       01 DVF-INVALID-MONTH     PIC X VALUE 'F'.
+       01 DVF-INVALID-DAY       PIC X VALUE 'F'.
+       01 DVF-INVALID-COMM-RATE PIC X VALUE 'F'.
+       01 DVF-INVALID-CAR-YEAR  PIC X VALUE 'F'.
+       01 DVF-INVALID-RECORD    PIC X VALUE 'F'.
 
       * VALID-DATES DATA
        01 DAYS-IN-MONTH PIC 99.
@@ -86,21 +95,20 @@
            88 30-DAYS VALUES 4,6,9,11.
            88 28-DAYS VALUES 2.
 
-      * INVALID DATA RECORD
-       01 INVALID-RECORD.
-           05 ERROR-MESSAGE PIC X(40) VALUE SPACES.
-           05 FILLER        PIC X(5)  VALUE SPACES.
-           05 RECORD-DATA   PIC X(90) VALUE SPACES.
 
       * ERROR MESSAGES
-       01 ERR-MISSING-DATA  PIC X(40) VALUE 
-           'INCOMING RECORD MISSING DATA'.
-       01 ERR-INVALID-DAY   PIC X(40) VALUE 'INVALID DAY'.
-       01 ERR-INVALID-MONTH PIC X(40) VALUE 'INVALID MONTH'.
-       01 ERR-INVALID-COMMISSION   PIC X(40) VALUE
-           'INVALID COMMISSION RATE'.
-       01 ERR-INVALID-CAR-YEAR     PIC X(40) VALUE
-           'INVALID CAR YEAR'.
+       01 ERR-MISSING-DATA                  PIC X(40) 
+           VALUE 'INCOMING RECORD MISSING DATA'.
+       01 ERR-NONNUMERIC-DATA               PIC X(40)
+           VALUE 'NON-NUMERIC DATA'.
+       01 ERR-INVALID-DAY                   PIC X(40) 
+           VALUE 'INVALID DAY'.
+       01 ERR-INVALID-MONTH                 PIC X(40) 
+           VALUE 'INVALID MONTH'.
+       01 ERR-INVALID-COMMISSION            PIC X(40) 
+           VALUE 'INVALID COMMISSION RATE'.
+       01 ERR-INVALID-CAR-YEAR              PIC X(40) 
+           VALUE 'INVALID CAR YEAR'.
 
 
        PROCEDURE DIVISION.
@@ -155,8 +163,14 @@
       ******************************************************************
        VALIDATE-DATA.
 
-      *    CLEAR DATA IN THE INVALID RECORD OUTPUT 
-           MOVE 'T' TO VALID-RECORD-SWITCH.
+      *    RESET DATA FLAGS 
+           MOVE 'F' TO DVF-INVALID-RECORD.
+           MOVE 'F' TO DVF-MISSING-DATA.
+           MOVE 'F' TO DVF-NONNUMERIC-DATA.
+           MOVE 'F' TO DVF-INVALID-MONTH.
+           MOVE 'F' TO DVF-INVALID-DAY.
+           MOVE 'F' TO DVF-INVALID-COMM-RATE.
+           MOVE 'F' TO DVF-INVALID-CAR-YEAR.
 
       *    PERFORM THE VARIOUS VALIDATION CHECKS
            PERFORM CHECK-FOR-MISSING-DATA.
@@ -165,17 +179,18 @@
            PERFORM VALIDATE-COMMISSION-RATE.
            PERFORM VALIDATE-CAR-YEAR.
 
-      *    IF THE RECORD IS INVALID, OUTPUT A BLANK LINE TO BAD.TXT
-           IF VALID-RECORD-SWITCH = 'F' THEN
-               MOVE SPACES TO ERROR-MESSAGE
-               MOVE SPACES TO RECORD-DATA
-               MOVE INVALID-RECORD TO BAD-PRINT-LINE
-               WRITE BAD-PRINT-LINE.
-
-      *    IF THE RECORD IS STILL VALID, OUTPUT AS GOOD RECORD
-           IF VALID-RECORD-SWITCH = 'T' THEN
-               MOVE INPUT-RECORD TO GOOD-PRINT-LINE
-               WRITE GOOD-PRINT-LINE.
+      *    CHECK IF RECORD IS VALID
+           IF DVF-MISSING-DATA = 'T' OR
+                DVF-NONNUMERIC-DATA = 'T' OR
+                DVF-INVALID-MONTH = 'T' OR
+                DVF-INVALID-DAY = 'T' OR
+                DVF-INVALID-COMM-RATE = 'T' OR
+                DVF-INVALID-CAR-YEAR = 'T'
+                THEN MOVE 'T' TO DVF-INVALID-RECORD.
+                
+                
+      *    OUTPUT THE RECORD TO CORRECT FILE WITH ERROR MESSAGES
+           PERFORM WRITE-OUTPUT-RECORD.
 
       *    READ THE NEXT DATA RECORD IN FROM INPUT-FILE
            READ INPUT-FILE
@@ -195,35 +210,20 @@
       *
       ******************************************************************
        CHECK-FOR-MISSING-DATA.
-           MOVE 'F' TO MISSING-DATA-SWITCH.
-
            IF SALE-LOCATION OF INPUT-RECORD = SPACES 
-               MOVE 'T' TO MISSING-DATA-SWITCH.
+               MOVE 'T' TO DVF-MISSING-DATA.
 
            IF BRANCH OF INPUT-RECORD = SPACES
-               MOVE 'T' TO MISSING-DATA-SWITCH.
+               MOVE 'T' TO DVF-MISSING-DATA.
 
            IF SALESPERSON OF INPUT-RECORD = SPACES
-               MOVE 'T' TO MISSING-DATA-SWITCH.
+               MOVE 'T' TO DVF-MISSING-DATA.
 
            IF CUSTOMER-NAME OF INPUT-RECORD = SPACES
-               MOVE 'T' TO MISSING-DATA-SWITCH.
+               MOVE 'T' TO DVF-MISSING-DATA.
 
            IF SALE-AMOUNT OF INPUT-RECORD = SPACES 
-               MOVE 'T' TO MISSING-DATA-SWITCH.
-
-           IF COMMISSION-RATE OF INPUT-RECORD = SPACES
-               MOVE 'T' TO MISSING-DATA-SWITCH.
-
-           IF CAR-YEAR OF INPUT-RECORD = SPACES
-               MOVE 'T' TO MISSING-DATA-SWITCH.
-
-           IF MISSING-DATA-SWITCH = 'T' THEN
-               MOVE ERR-MISSING-DATA TO ERROR-MESSAGE
-               MOVE INPUT-RECORD TO RECORD-DATA OF INVALID-RECORD 
-               MOVE INVALID-RECORD TO BAD-PRINT-LINE
-               WRITE BAD-PRINT-LINE
-               MOVE 'F' TO VALID-RECORD-SWITCH.
+               MOVE 'T' TO DVF-MISSING-DATA.
 
 
       ******************************************************************
@@ -236,6 +236,11 @@
       *
       ******************************************************************
        VALIDATE-NUMERIC-DATA.
+           IF BRANCH = SPACES THEN
+               MOVE 'T' TO DVF-NONNUMERIC-DATA.
+
+           IF SALE-AMOUNT = SPACES THEN
+               MOVE 'T' TO DVF-NONNUMERIC-DATA.
 
 
       ******************************************************************
@@ -246,20 +251,16 @@
       *
       ******************************************************************
        VALIDATE-SALES-DATE.
-           MOVE 'T' TO VALID-DATE-FLAG.
 
-           IF SALE-MONTH > 12 OR SALE-MONTH < 1
-               MOVE 'F' TO VALID-DATE-FLAG.
-
-           IF VALID-DATE-FLAG = 'F' THEN
-               MOVE ERR-INVALID-MONTH TO ERROR-MESSAGE
-               MOVE INPUT-RECORD TO RECORD-DATA
-               MOVE INVALID-RECORD TO BAD-PRINT-LINE
-               WRITE BAD-PRINT-LINE
-               MOVE 'F' TO VALID-RECORD-SWITCH.
-
-           IF VALID-DATE-FLAG = 'T' THEN
-                PERFORM CHECK-DAYS-IN-MONTH.
+           IF SALE-DATE IS NOT NUMERIC
+               MOVE 'T' TO DVF-NONNUMERIC-DATA
+           ELSE
+               IF VALID-MONTH THEN
+                   PERFORM CHECK-DAYS-IN-MONTH
+               ELSE
+                   MOVE 'T' TO DVF-INVALID-MONTH
+               END-IF
+           END-IF. 
 
 
 
@@ -274,42 +275,40 @@
        CHECK-DAYS-IN-MONTH.
 
            MOVE SALE-MONTH TO DAYS-IN-MONTH.
-           MOVE 'F' TO INVALID-DAY-SWITCH.
 
            IF 31-DAYS THEN
                IF SALE-DAY > 31 OR SALE-DAY < 1 THEN
-                   MOVE 'T' TO INVALID-DAY-SWITCH.
+                   MOVE 'T' TO DVF-INVALID-DAY.
                    
            IF 30-DAYS THEN
                IF SALE-DAY > 30 OR SALE-DAY < 1 THEN
-                   MOVE 'T' TO INVALID-DAY-SWITCH.
+                   MOVE 'T' TO DVF-INVALID-DAY.
                    
            IF 28-DAYS THEN
                IF SALE-DAY > 28 OR SALE-DAY < 1 THEN
-                   MOVE 'T' TO INVALID-DAY-SWITCH.
-
-           IF INVALID-DAY-SWITCH = 'T'
-               MOVE ERR-INVALID-DAY TO ERROR-MESSAGE
-               MOVE INPUT-RECORD TO RECORD-DATA
-               MOVE INVALID-RECORD TO BAD-PRINT-LINE
-               WRITE BAD-PRINT-LINE
-               MOVE 'F' TO VALID-RECORD-SWITCH.
+                   MOVE 'T' TO DVF-INVALID-DAY.
            
 
       ******************************************************************
       *
       *    VALIDATE-COMMISSION-RATE
-      *
-      *    Validates that the input commission rate is between 0-100.
+      *1
+      *    Validates that the input commission rate is not blank, 
+      *    numeric, and between 0-100.
       *
       ******************************************************************
        VALIDATE-COMMISSION-RATE.
-           IF COMMISSION-RATE > 100 OR COMMISSION-RATE < 0 THEN
-                MOVE ERR-INVALID-COMMISSION TO ERROR-MESSAGE
-                MOVE INPUT-RECORD TO RECORD-DATA
-                MOVE INVALID-RECORD TO BAD-PRINT-LINE
-                WRITE BAD-PRINT-LINE
-                MOVE 'F' TO VALID-RECORD-SWITCH.
+           IF COMMISSION-RATE = SPACES THEN
+               MOVE 'T' TO DVF-MISSING-DATA
+           ELSE
+               IF COMMISSION-RATE IS NOT NUMERIC THEN
+                   MOVE 'T' TO DVF-NONNUMERIC-DATA
+               ELSE
+                   IF NOT VALID-COMM-RATE THEN
+                       MOVE 'T' TO DVF-INVALID-COMM-RATE
+               END-IF
+           END-IF.  
+
 
       ******************************************************************
       *
@@ -319,12 +318,16 @@
       *
       ******************************************************************
        VALIDATE-CAR-YEAR.
-           IF CAR-YEAR > 1995 OR CAR-YEAR < 1930 THEN
-               MOVE ERR-INVALID-CAR-YEAR TO ERROR-MESSAGE
-               MOVE INPUT-RECORD TO RECORD-DATA
-               MOVE INVALID-RECORD TO BAD-PRINT-LINE
-               WRITE BAD-PRINT-LINE
-               MOVE 'F' TO VALID-RECORD-SWITCH.
+           IF CAR-YEAR = SPACES THEN
+               MOVE 'T' TO DVF-MISSING-DATA
+           ELSE
+               IF CAR-YEAR IS NOT NUMERIC THEN
+                   MOVE 'T' TO DVF-INVALID-CAR-YEAR
+               ELSE
+                   IF NOT VALID-CAR-YEAR THEN
+                       MOVE 'T' TO DVF-INVALID-CAR-YEAR
+               END-IF
+           END-IF.
 
 
       ******************************************************************
@@ -335,6 +338,55 @@
       *
       ******************************************************************
        WRITE-FILE-HEADINGS.
+           WRITE BAD-PRINT-LINE FROM INVALID-RECORD.
+
+       
+      ******************************************************************
+      *
+      *    WRITE-OUTPUT-RECORD
+      *
+      *    Writes out the record and errors to appropriate files.
+      *
+      ******************************************************************
+       WRITE-OUTPUT-RECORD.
+           IF DVF-INVALID-RECORD =  'F' THEN
+               WRITE GOOD-PRINT-LINE FROM INPUT-RECORD
+           ELSE
+               MOVE INPUT-RECORD TO RECORD-DATA
+               
+               IF DVF-MISSING-DATA = 'T' THEN
+                   MOVE ERR-MISSING-DATA TO ERROR-MESSAGE
+                   WRITE BAD-PRINT-LINE FROM INVALID-RECORD
+               END-IF
+
+               IF DVF-NONNUMERIC-DATA = 'T' THEN
+                   MOVE ERR-NONNUMERIC-DATA TO ERROR-MESSAGE
+                   WRITE BAD-PRINT-LINE FROM INVALID-RECORD
+               END-IF
+
+               IF DVF-INVALID-MONTH = 'T' THEN
+                   MOVE ERR-INVALID-MONTH TO ERROR-MESSAGE
+                   WRITE BAD-PRINT-LINE FROM INVALID-RECORD
+               END-IF
+
+               IF DVF-INVALID-DAY = 'T' THEN
+                   MOVE ERR-INVALID-DAY TO ERROR-MESSAGE
+                   WRITE BAD-PRINT-LINE FROM INVALID-RECORD
+               END-IF
+
+               IF DVF-INVALID-COMM-RATE = 'T' THEN
+                   MOVE ERR-INVALID-COMMISSION TO ERROR-MESSAGE
+                   WRITE BAD-PRINT-LINE FROM INVALID-RECORD
+               END-IF
+
+               IF DVF-INVALID-CAR-YEAR = 'T' THEN
+                   MOVE ERR-INVALID-CAR-YEAR TO ERROR-MESSAGE
+                   WRITE BAD-PRINT-LINE FROM INVALID-RECORD
+               END-IF
+
+               WRITE BAD-PRINT-LINE FROM SPACES
+
+           END-IF.
 
 
        END PROGRAM ASSIGNMENT2.
