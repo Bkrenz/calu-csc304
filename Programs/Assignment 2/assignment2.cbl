@@ -306,6 +306,7 @@
                ELSE
                    IF NOT VALID-COMM-RATE THEN
                        MOVE 'T' TO DVF-INVALID-COMM-RATE
+                   END-IF 
                END-IF
            END-IF.  
 
@@ -326,6 +327,7 @@
                ELSE
                    IF NOT VALID-CAR-YEAR THEN
                        MOVE 'T' TO DVF-INVALID-CAR-YEAR
+                   END-IF 
                END-IF
            END-IF.
 
