@@ -236,10 +236,10 @@
       *
       ******************************************************************
        VALIDATE-NUMERIC-DATA.
-           IF BRANCH = SPACES THEN
+           IF BRANCH IS NOT NUMERIC THEN
                MOVE 'T' TO DVF-NONNUMERIC-DATA.
 
-           IF SALE-AMOUNT = SPACES THEN
+           IF SALE-AMOUNT IS NOT NUMERIC THEN
                MOVE 'T' TO DVF-NONNUMERIC-DATA.
 
 
