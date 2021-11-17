@@ -32,6 +32,22 @@
 				"kind": "build",
 				"isDefault": true
 			}
+		},
+		{
+			"type": "shell",
+			"label": "build-assignment3",
+			"command": "cbllink",
+			"args": [
+				"-obuild\\a3",
+                "a4.cbl"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}\\Programs\\Assignment 3"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
 		}
 	]
 }
