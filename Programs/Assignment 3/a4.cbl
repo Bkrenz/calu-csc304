@@ -7,7 +7,7 @@
       ******************************************************************
 
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. ASSIGNMENT2.
+       PROGRAM-ID. ASSIGNMENT4.
        AUTHOR. 'KRENCY, ROBINSON, MORRIS, MORRISON'.
 
 
@@ -42,9 +42,9 @@
            RECORD CONTAINS 50 CHARACTERS
            DATA RECORD IS OUTPUT-RECORD.
        01 OUTPUT-RECORD.
-           05 LAST-NAME PIC X(15).
-           05 FIRST-NAME PIC X(10).
-           05 GROSS-PAY PIC $ZZ,ZZ9.99.
+           03 LAST-NAME PIC X(15).
+           03 FIRST-NAME PIC X(10).
+           03 GROSS-PAY PIC $ZZ,ZZ9.99.
 
 
        WORKING-STORAGE SECTION.
@@ -195,4 +195,4 @@
            WRITE OUTPUT-RECORD.
 
 
-       END PROGRAM ASSIGNMENT2.
+       END PROGRAM ASSIGNMENT4.
